@@ -21,7 +21,7 @@ jobs:
       run: pip install pyinstaller
     
     - name: Build EXE
-      run: pyinstaller --onefile --noconsole --name=SystemLocker WL1
+      run: pyinstaller --onefile --noconsole --name=SystemLocker wlock1.py
     
     - name: Upload EXE
       uses: actions/upload-artifact@v4
@@ -48,7 +48,7 @@ jobs:
         pip install pyinstaller
     
     - name: Build Linux executable
-      run: pyinstaller --onefile --noconsole --name=SystemLocker WL1
+      run: pyinstaller --onefile --noconsole --name=SystemLocker wlock1.py
     
     - name: Upload executable
       uses: actions/upload-artifact@v4
